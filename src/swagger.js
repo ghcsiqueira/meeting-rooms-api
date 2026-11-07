@@ -13,7 +13,7 @@ export const openApiSpec = {
     description: [
       'MVP para agendar e gerenciar salas de reunião, evitando conflitos entre times.',
       '',
-      '**Acesso restrito a funcionários**: todos os endpoints (exceto `/auth/login` e `/health`) exigem JWT.',
+      '**Acesso restrito a funcionários**: todos os endpoints (exceto `/auth/login`, `/auth/register` e `/health`) exigem JWT.',
       'Faça login em `POST /auth/login`, copie o `token` e clique em **Authorize** (cadeado).',
       '',
       '**Regras de negócio**',
@@ -57,6 +57,34 @@ export const openApiSpec = {
           },
           400: err('Dados inválidos'),
           401: err('Credenciais inválidas'),
+        },
+      },
+    },
+    '/auth/register': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Cadastro de funcionário (público)',
+        description: [
+          'Cria uma conta com perfil `employee` usando nome, e-mail corporativo e senha.',
+          '',
+          '- RN1: o e-mail deve ser do domínio da empresa (`@empresadorafa.com`).',
+          '- RN2: a senha deve ter no mínimo 8 caracteres.',
+          '- RN3: não é permitido cadastrar dois usuários com o mesmo e-mail.',
+        ].join('\n'),
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/RegisterRequest' },
+              example: { name: 'Maria Silva', email: 'maria@empresadorafa.com', password: 'senha1234' },
+            },
+          },
+        },
+        responses: {
+          201: { description: 'Cadastrado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Employee' } } } },
+          400: err('Dados inválidos (senha curta, e-mail malformado)'),
+          409: err('E-mail já cadastrado (EMPLOYEE_ALREADY_EXISTS)'),
+          422: err('E-mail fora do domínio da empresa (INVALID_EMAIL_DOMAIN)'),
         },
       },
     },
@@ -256,6 +284,15 @@ export const openApiSpec = {
         type: 'object',
         required: ['email', 'password'],
         properties: { email: { type: 'string' }, password: { type: 'string' } },
+      },
+      RegisterRequest: {
+        type: 'object',
+        required: ['name', 'email', 'password'],
+        properties: {
+          name: { type: 'string', example: 'Maria Silva' },
+          email: { type: 'string', example: 'maria@empresadorafa.com' },
+          password: { type: 'string', minLength: 8 },
+        },
       },
       LoginResponse: {
         type: 'object',

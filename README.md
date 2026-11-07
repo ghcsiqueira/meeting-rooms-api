@@ -66,6 +66,7 @@ Confira com: `node --version`
 
 | Método | Rota | Acesso | Descrição |
 |---|---|---|---|
+| POST | `/auth/register` | público | Cadastro de funcionário (nome, e-mail corporativo + senha) |
 | POST | `/auth/login` | público | Login, retorna JWT |
 | GET | `/me` | funcionário | Dados do usuário logado |
 | GET/POST | `/employees` | admin | Lista / cadastra funcionários |
@@ -91,6 +92,14 @@ Confira com: `node --version`
 
 **Erros** seguem o formato `{ "error": { "code": "...", "message": "..." } }`.
 
+## Cadastro de usuário
+
+| Regra | Como é atendida | Erro |
+|---|---|---|
+| RN1 – e-mail do domínio da empresa | Domínio deve ser `@empresadorafa.com` (configurável) | `422 INVALID_EMAIL_DOMAIN` |
+| RN2 – senha com no mínimo 8 caracteres | Validação no cadastro | `400 VALIDATION_ERROR` |
+| RN3 – sem e-mail duplicado | Índice UNIQUE + checagem (sem diferenciar maiúsculas) | `409 EMPLOYEE_ALREADY_EXISTS` |
+
 ## Testes
 
 ```bash
@@ -100,7 +109,7 @@ Cobrem RN1–RN4, permissões, cancelamento e status das salas.
 
 ## Decisões do MVP
 
-- **Acesso só de funcionários:** não há auto-cadastro. Apenas um admin cria contas. O token é revalidado no banco a cada requisição.
+- **Acesso só de funcionários:** o auto-cadastro (`POST /auth/register`) só aceita e-mails do domínio `COMPANY_EMAIL_DOMAIN` (padrão `empresadorafa.com`), com senha de no mínimo 8 caracteres. O admin também pode criar contas. O token é revalidado no banco a cada requisição.
 - **Concorrência:** SQLite embutido é síncrono e o Node é single-thread, então "verificar conflito + gravar" é atômico numa única instância.
 - **Cancelar = apagar** a reunião (sem histórico).
 
