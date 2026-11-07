@@ -1,0 +1,19 @@
+{
+  "name": "meeting-rooms-api",
+  "version": "1.0.0",
+  "description": "MVP - API de agendamento e gerenciamento de salas de reunião",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": { "node": ">=22.13.0" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env --disable-warning=ExperimentalWarning src/server.js",
+    "dev": "node --watch --env-file-if-exists=.env --disable-warning=ExperimentalWarning src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test tests/*.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
