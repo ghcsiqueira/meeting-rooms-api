@@ -42,5 +42,34 @@ export function createEmployee(db, now, input) {
   }
 }
 
+/**
+ * Auto-cadastro público de funcionário (nome, e-mail corporativo + senha).
+ * RN1: e-mail deve ser do domínio da empresa.
+ * RN2: senha com no mínimo 8 caracteres.
+ * RN3: e-mail não pode estar duplicado.
+ */
+export function registerEmployee(db, config, now, input) {
+  const name = requireString(input.name, 'name');
+  const email = requireString(input.email, 'email').toLowerCase();
+  const password = requireString(input.password, 'password', { min: 8, max: 200 });
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    throw new AppError(400, 'VALIDATION_ERROR', '"email" inválido');
+  }
+  if (email.split('@')[1] !== config.companyEmailDomain) {
+    throw new AppError(422, 'INVALID_EMAIL_DOMAIN', `O e-mail deve ser do domínio @${config.companyEmailDomain}`);
+  }
+  try {
+    const { lastInsertRowid } = db
+      .prepare('INSERT INTO employees (name, email, password_hash, role, created_at) VALUES (?,?,?,?,?)')
+      .run(name, email, bcrypt.hashSync(password, 10), 'employee', now());
+    return { id: Number(lastInsertRowid), name, email, role: 'employee' };
+  } catch (e) {
+    if (String(e.message).includes('UNIQUE')) {
+      throw new AppError(409, 'EMPLOYEE_ALREADY_EXISTS', 'Já existe um funcionário com esse e-mail');
+    }
+    throw e;
+  }
+}
+
 export const listEmployees = (db) =>
   db.prepare('SELECT id, name, email, role FROM employees ORDER BY name').all();

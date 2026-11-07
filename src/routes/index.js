@@ -10,8 +10,12 @@ export function buildRoutes({ db, config, now }) {
 
   r.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-  // ---- Autenticação (único endpoint público) ----
+  // ---- Autenticação (endpoints públicos: login e cadastro) ----
   r.post('/auth/login', (req, res) => res.json(employees.login(db, config, req.body ?? {})));
+
+  r.post('/auth/register', (req, res) =>
+    res.status(201).json(employees.registerEmployee(db, config, now, req.body ?? {}))
+  );
 
   // ---- Funcionários (admin) ----
   r.post('/employees', auth, requireAdmin, (req, res) =>

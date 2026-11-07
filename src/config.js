@@ -10,6 +10,7 @@ export function loadConfig(env = process.env) {
     port: Number(env.PORT ?? 3000),
     jwtSecret: env.JWT_SECRET ?? 'dev-only-secret-change-me',
     jwtExpiresIn: env.JWT_EXPIRES_IN ?? '8h',
+    companyEmailDomain: (env.COMPANY_EMAIL_DOMAIN ?? 'empresadorafa.com').toLowerCase(),
     dbPath: env.DB_PATH ?? './data/rooms.db',
     admin: {
       name: env.ADMIN_NAME ?? 'Administrador',
